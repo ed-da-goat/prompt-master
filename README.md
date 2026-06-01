@@ -208,7 +208,7 @@ Prompt Master includes specific profiles for 20+ tools. For anything not on the 
 | **Qwen 2.5 / Qwen3** | Open-weight LLM | Chat template format, thinking vs non-thinking mode detection |
 | **Local models (Llama, Mistral)** | Open-weight LLM | Shorter prompts, simpler structure, no complex nesting |
 | **DeepSeek-R1** | Reasoning LLM | Short clean instructions, strips CoT, suppresses thinking output if needed |
-| **MiniMax (M2.7 / M2.5)** | Reasoning LLM | Temperature clamping, thinking tag control, structured output optimization |
+| **MiniMax (M3 / M2.7)** | Reasoning LLM | Temperature clamping, thinking tag control, structured output optimization |
 | **Claude Code** | Agentic AI | Stop conditions, file scope, checkpoint output |
 | **Cursor / Windsurf** | IDE AI | File path, function name, do-not-touch list, sequential prompt guidance |
 | **Cline (formerly Claude Dev)** | Agentic IDE | File scope, approval gates, stop conditions, task breakdown |
