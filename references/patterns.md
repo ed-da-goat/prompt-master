@@ -1,6 +1,6 @@
 # Credit-Killing Patterns Reference
 
-37 patterns that waste tokens and cause re-prompts. Read this file when the user pastes a bad prompt and asks you to fix it, or when diagnosing why a prompt is underperforming.
+38 patterns that waste tokens and cause re-prompts. Read this file when the user pastes a bad prompt and asks you to fix it, or when diagnosing why a prompt is underperforming.
 
 ---
 
@@ -62,7 +62,7 @@
 | # | Pattern | Bad Example | Fixed |
 |---|---------|------------|-------|
 | 26 | **No CoT for logic task** | "which approach is better?" | "Think through both approaches step by step before recommending" |
-| 27 | **Adding CoT to reasoning models** | "think step by step" sent to o1/o3 | Remove it — reasoning models think internally, CoT instructions degrade output |
+| 27 | **Adding CoT to reasoning models** | "think step by step" sent to GPT-5.x Thinking, DeepSeek V4 thinking, Qwen3+ thinking, or Claude adaptive thinking | Remove it — reasoning-native models think internally, CoT instructions degrade output (full list: models.md) |
 | 28 | **Expecting inter-session memory** | "you already know my project" | Always re-provide the Memory Block in every new session |
 | 29 | **Contradicting prior work** | New prompt ignores earlier architecture | Include Memory Block with all established decisions |
 | 30 | **No grounding rule for factual tasks** | "summarize what experts say about X" | "Use only information you are highly confident is accurate. Say [uncertain] if not." |
@@ -78,5 +78,6 @@
 | 33 | **Silent agent** | No progress output | "After each step output: ✅ [what was completed]" |
 | 34 | **Unlocked filesystem** | No file restrictions | "Only edit files inside `src/`. Do not touch `package.json`, `.env`, or any config file." |
 | 35 | **No human review trigger** | Agent decides everything autonomously | "Stop and ask before: deleting any file, adding any dependency, or changing the database schema" |
-| 36 | **Vague first turn on Opus 4.7** | "fix the auth bug" with no scope, no files, no criteria | Opus 4.7 reads prompts literally — it no longer fills implicit context like 4.6 did. Use Template M. Front-load intent, file scope, constraints, and acceptance criteria. |
-| 37 | **Context rot on long sessions** | Keeps correcting in the same session for 60+ turns | New task = new session. Use /rewind instead of correcting. /compact at ~50% context. Subagents for file-heavy investigation. |schema" |
+| 36 | **Vague first turn on current Claude** | "fix the auth bug" with no scope, no files, no criteria | Fable 5 / Opus 4.8 / 4.7 read prompts literally — they do not fill implicit context like older models did. Use Template M. Front-load intent, file scope, constraints, and acceptance criteria. |
+| 37 | **Context rot on long sessions** | Keeps correcting in the same session for 60+ turns | New task = new session. Use /rewind instead of correcting. /compact at ~50% context. Subagents for file-heavy investigation. |
+| 38 | **Hardcoded retired model or dead parameter** | Prompt targets o3 / deepseek-reasoner, or sets `temperature` / `budget_tokens` for Opus 4.7+ | Replace with the current equivalent per models.md, and tell the user what changed and why |
