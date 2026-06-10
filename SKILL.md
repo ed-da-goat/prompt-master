@@ -1,6 +1,6 @@
 ---
 name: prompt-master
-version: 1.6.0
+version: 1.7.0
 description: Generates optimized prompts for AI tools. Activates only when the user explicitly asks to write, fix, improve, or adapt a prompt for a specific AI tool (LLM, Cursor, Midjourney, image AI, video AI, coding agents, etc.). Does not activate for general conversation, coding tasks, document writing, or other non-prompt-engineering work.
 ---
 
@@ -24,7 +24,7 @@ Build prompts one at a time, ready to paste.
   - **Graph of Thought** -- requires an external graph engine not present in most tools
   - **Universal Self-Consistency** -- requires independent sampling passes
   - **Prompt chaining as a layered technique** -- compounds fabrication risk across longer chains
-- Do not add Chain of Thought to reasoning-native models (o3, o4-mini, DeepSeek-R1, Qwen3 thinking mode) — they think internally, CoT degrades output
+- Do not add Chain of Thought to reasoning-native models or thinking modes (GPT-5.x Thinking/Pro, DeepSeek V4 thinking, Qwen3+ thinking, Claude adaptive thinking, legacy o-series/R1) — they think internally, CoT degrades output. Full list: [references/models.md](references/models.md).
 - Do not ask more than 3 clarifying questions before producing a prompt
 - Do not pad output with explanations the user did not request
 
@@ -65,21 +65,25 @@ Before writing any prompt, silently extract these 9 dimensions. Missing critical
 
 Identify the tool and route accordingly. Read full templates from [references/templates.md](references/templates.md) only for the category you need.
 
+Model IDs, parameters, and version-tied behavior live in [references/models.md](references/models.md), each vendor section dated. If the section you need is older than 60 days (or marked UNVERIFIED), re-verify per its refresh protocol before asserting the fact — never present stale model facts as current.
+
 ---
 
-**Claude (claude.ai, Claude API, Claude 4.x)**
-- Be explicit and specific — Claude 4.x follows instructions literally. Opus 4.7 especially: it does exactly what you say, nothing more. Missing context = narrow literal output, not a smart guess.
+**Claude (claude.ai, Claude API — Fable 5, Opus 4.8/4.7, Sonnet 4.6, Haiku 4.5)**
+- Be explicit and specific — current Claude models follow instructions literally: they do exactly what you say, nothing more. Missing context = narrow literal output, not a smart guess.
 - XML tags help for complex multi-section prompts: `<context>`, `<task>`, `<constraints>`, `<output_format>`
 - Claude Opus 4.x over-engineers by default — add "Only make changes directly requested. Do not add features or refactor beyond what was asked."
 - Provide context and reasoning WHY, not just WHAT — Claude generalizes better from explanations
 - Always specify output format and length explicitly
-- For complex or multi-step tasks on Opus 4.7: front-load everything in one turn — intent, constraints, acceptance criteria, relevant files. Every extra back-and-forth turn adds reasoning overhead and token cost.
-- Do NOT add "think step by step" or fixed thinking budget instructions — Opus 4.7 uses adaptive thinking and calibrates depth automatically. To influence depth: "Think carefully before responding" (more) or "Prioritize responding quickly" (less).
-- Use Template M for agentic or multi-step tasks on Opus 4.7.
+- For complex or multi-step tasks: front-load everything in one turn — intent, constraints, acceptance criteria, relevant files. Every extra back-and-forth turn adds reasoning overhead and token cost.
+- Do NOT add "think step by step" or fixed thinking budget instructions — current Claude uses adaptive thinking and calibrates depth automatically. To influence depth: "Think carefully before responding" (more) or "Prioritize responding quickly" (less).
+- Opus 4.8 / Fable 5 behavioral shifts (narrates more, asks more often, under-reaches for tools/subagents/search) and the API param surface (adaptive-only thinking, sampling params removed, prefills removed, effort levels): see models.md → Anthropic, and apply the relevant snippets.
+- Use Template M for agentic or multi-step tasks.
 
 ---
 
 **ChatGPT / GPT-5.x / OpenAI GPT models**
+- The active lineup is all GPT-5 family — GPT-5.5 Instant (default), GPT-5.4 Thinking, GPT-5.4 Pro (see models.md → OpenAI)
 - Start with the smallest prompt that achieves the goal — add structure only when needed
 - Be explicit about the output contract: what format, what length, what "done" looks like
 - State tool-use expectations explicitly if the model has access to tools
@@ -89,7 +93,8 @@ Identify the tool and route accordingly. Read full templates from [references/te
 
 ---
 
-**o3 / o4-mini / OpenAI reasoning models**
+**GPT-5.4 Thinking / Pro (OpenAI reasoning models)**
+- The o-series (o3, o4-mini) is retired — if the user names one, target GPT-5.4 Thinking and apply these same rules
 - SHORT clean instructions ONLY — these models reason across thousands of internal tokens
 - NEVER add CoT, "think step by step", or reasoning scaffolding — it actively degrades output
 - Prefer zero-shot first — add few-shot only if strictly needed and tightly aligned
@@ -98,11 +103,12 @@ Identify the tool and route accordingly. Read full templates from [references/te
 
 ---
 
-**Gemini 2.x / Gemini 3 Pro**
+**Gemini (3.1 Pro current)**
 - Strong at long-context and multimodal — leverage its large context window for document-heavy prompts
+- Set `thinking_level: high` for complex reasoning tasks (API); `gemini-3-pro-preview` is discontinued — current IDs in models.md → Google
+- Tuned concise and may GUESS when information is missing — for grounded tasks always add "Base your response only on the provided context. Do not extrapolate. If information is missing, say so."
 - Prone to hallucinated citations — always add "Cite only sources you are certain of. If uncertain, say [uncertain]."
 - Can drift from strict output formats — use explicit format locks with a labelled example
-- For grounded tasks add "Base your response only on the provided context. Do not extrapolate."
 
 ---
 
@@ -114,9 +120,9 @@ Identify the tool and route accordingly. Read full templates from [references/te
 
 ---
 
-**Qwen3 (thinking mode)**
+**Qwen3 / 3.5 / 3.6 (thinking mode)**
 - Two modes: thinking mode (/think or enable_thinking=True) and non-thinking mode
-- Thinking mode: treat exactly like o3 — short clean instructions, no CoT, no scaffolding
+- Thinking mode: reasoning-native — short clean instructions, no CoT, no scaffolding
 - Non-thinking mode: treat like Qwen2.5 instruct — full structure, explicit format, role assignment
 
 ---
@@ -138,10 +144,11 @@ Identify the tool and route accordingly. Read full templates from [references/te
 
 ---
 
-**DeepSeek-R1**
-- Reasoning-native like o3 — do NOT add CoT instructions
-- Short clean instructions only — state the goal and desired output format
-- Outputs reasoning in `<think>` tags by default — add "Output only the final answer, no reasoning." if needed
+**DeepSeek V4 (R1 superseded)**
+- Current models: `deepseek-v4-pro` (coding/complex agents) and `deepseek-v4-flash` (fast/cheap). Legacy `deepseek-chat` / `deepseek-reasoner` names retire 2026-07-24 — never target them (models.md → DeepSeek)
+- Thinking mode is reasoning-native — do NOT add CoT instructions; short clean instructions only
+- Unlike R1, V4 supports tool calls inside thinking mode — agentic prompts no longer have to choose between reasoning and tools
+- May output reasoning in `<think>` tags — add "Output only the final answer, no reasoning." if needed
 
 ---
 
@@ -161,10 +168,10 @@ Identify the tool and route accordingly. Read full templates from [references/te
 - Agentic — runs tools, edits files, executes commands autonomously
 - Starting state + target state + allowed actions + forbidden actions + stop conditions + checkpoints
 - Stop conditions are MANDATORY — runaway loops are the biggest credit killer
-- Opus 4.7 default in Claude Code is xhigh effort — do NOT specify effort level in prompts, it's already set
-- Opus 4.7 is more literal than 4.6 — vague first turns produce narrower results. Front-load everything: intent, file scope, constraints, acceptance criteria, session strategy.
-- Opus 4.7 uses fewer tool calls by default and reasons more between calls — explicitly instruct tool use when needed: "Read all files in /src/auth/ before starting"
-- Opus 4.7 spawns fewer subagents by default — explicitly request when needed: "Use a subagent to investigate X so it stays out of main context"
+- Effort is already set (xhigh is the Claude Code default) — do NOT specify effort level in prompts
+- Current models (Fable 5, Opus 4.8/4.7) are literal — vague first turns produce narrower results. Front-load everything: intent, file scope, constraints, acceptance criteria, session strategy. For long autonomous runs, state the full goal up front.
+- Current Opus under-reaches for tools and subagents — explicitly instruct when needed: "Read all files in /src/auth/ before starting"; "Use a subagent to investigate X so it stays out of main context"
+- Opus 4.8 narrates more than 4.7 by default — remove "summarize after every N steps" scaffolding; if too chatty, add a silence-default (snippet in models.md → Anthropic)
 - Claude Opus 4.x over-engineers — add "Only make changes directly requested. Do not add extra files, abstractions, or features."
 - Always scope to specific files and directories — never give a global instruction without a path anchor
 - Human review triggers required: "Stop and ask before deleting any file, adding any dependency, or affecting the database schema"
@@ -173,7 +180,7 @@ Identify the tool and route accordingly. Read full templates from [references/te
 
 ---
 
-**Antigravity (Google's agent-first IDE, powered by Gemini 3 Pro)**
+**Antigravity (Google's agent-first IDE, powered by Gemini 3.x)**
 - Task-based prompting — describe outcomes, not steps
 - Prompt for an Artifact (task list, implementation plan) before execution so you can review it first
 - Browser automation is built-in — include verification steps: "After building, verify UI at 375px and 1440px using the browser agent"
@@ -372,8 +379,8 @@ Scan every user-provided prompt or rough idea for these failure patterns. Fix si
 - Entire codebase pasted as context → scope to the relevant file and function only
 
 **Reasoning failures**
-- Logic or analysis task with no step-by-step → add "Think through this carefully before answering"
-- CoT added to o3/o4-mini/R1/Qwen3-thinking → REMOVE IT
+- Logic or analysis task with no step-by-step → add "Think through this carefully before answering" (standard non-thinking models only)
+- CoT added to a reasoning-native model or thinking mode (models.md → Reasoning-Native List) → REMOVE IT
 - New prompt contradicts prior session decisions → flag, resolve, include memory block
 
 **Agentic failures**
@@ -410,7 +417,7 @@ When the user's request references prior work, decisions, or session history —
 **Grounding anchors** — for any factual or citation task:
 "Use only information you are highly confident is accurate. If uncertain, write [uncertain] next to the claim. Do not fabricate citations or statistics."
 
-**Chain of Thought** — for logic, math, and debugging on standard reasoning models ONLY (Claude, GPT-5.x, Gemini, Qwen2.5, Llama). Never on o3/o4-mini/R1/Qwen3-thinking.
+**Chain of Thought** — for logic, math, and debugging on standard NON-thinking models only (GPT-5.x Instant, Gemini without thinking_level, Qwen non-thinking mode, open-weight instruct models). Never on anything in the models.md Reasoning-Native List.
 "Think through this step by step before answering."
 
 ---
@@ -440,9 +447,10 @@ The user pastes the prompt into their target tool. It works on the first try. Ze
 ---
 
 ## Reference Files
-Read only when the task requires it. Do not load both at once.
+Read only when the task requires it. Do not load all at once.
 
 | File | Read When |
 |------|-----------|
+| [references/models.md](references/models.md) | Any model-specific claim — IDs, params, behavior, staleness check |
 | [references/templates.md](references/templates.md) | You need the full template structure for any tool category |
-| [references/patterns.md](references/patterns.md) | User pastes a bad prompt to fix, or you need the complete 35-pattern reference |
+| [references/patterns.md](references/patterns.md) | User pastes a bad prompt to fix, or you need the complete failure-pattern reference |

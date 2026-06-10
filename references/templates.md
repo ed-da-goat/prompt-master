@@ -18,7 +18,7 @@ Full template library for Prompt Master. Read the relevant template when the use
 | [J — Reference Image Editing](#template-j--reference-image-editing) | Editing an existing image with a reference |
 | [K — ComfyUI](#template-k--comfyui) | ComfyUI node-based image workflows |
 | [L — Prompt Decompiler](#template-l--prompt-decompiler) | Breaking down, adapting, or splitting existing prompts |
-| [M — Opus 4.7 Task Brief](#template-m--opus-4.7-task-brief) | Complex, multi-step, or agentic task on Claude Opus 4.7 |
+| [M — Claude Agentic Task Brief](#template-m--claude-agentic-task-brief) | Complex, multi-step, or agentic task on current Claude (Fable 5, Opus 4.8/4.7) |
 
 ---
 
@@ -125,7 +125,7 @@ Experiment: Give 3 variants ranging from minimal to bold.
 
 *Use for logic-heavy tasks, math, debugging, and multi-factor analysis where the AI needs to reason carefully before committing to an answer.*
 
-**Important:** Only use CoT for standard reasoning models (Claude, GPT-4o, Gemini). Do NOT add CoT instructions to o1, o3, or Claude extended thinking — they reason internally and CoT instructions degrade their output.
+**Important:** Only use CoT for standard NON-thinking models (GPT-5.x Instant, Gemini without thinking_level, open-weight instruct models). Do NOT add CoT to reasoning-native models or thinking modes — GPT-5.x Thinking/Pro, DeepSeek V4 thinking, Qwen3+ thinking, Claude adaptive thinking, legacy o-series/R1 — they reason internally and CoT instructions degrade their output. Full list: models.md → Reasoning-Native List.
 
 ```
 [Task statement]
@@ -148,7 +148,7 @@ Give your final answer in <answer> tags only.
 - Analysis where a wrong first impression is likely
 
 **When NOT to use:**
-- o1 / o3 / reasoning models (they think internally — adding CoT hurts)
+- Reasoning-native models / thinking modes (they think internally — adding CoT hurts)
 - Simple tasks where the answer is clear (unnecessary overhead)
 - Creative tasks (CoT can kill natural voice)
 
@@ -396,9 +396,9 @@ Run these in order. Each output feeds the next.
 ```
 ---
 
-## Template M — Opus 4.7 Task Brief
+## Template M — Claude Agentic Task Brief
 
-*Use for any complex, multi-step, or agentic task on Claude Opus 4.7 — claude.ai, API, or Claude Code. Opus 4.7 reads prompts literally. Missing context produces narrow output. This template front-loads everything so the first turn is the only turn.*
+*Use for any complex, multi-step, or agentic task on current Claude models (Fable 5, Opus 4.8, Opus 4.7) — claude.ai, API, or Claude Code. These models read prompts literally: missing context produces narrow output, not a smart guess. This template front-loads everything so the first turn is the only turn — which is also how current Opus performs best on long autonomous runs.*
 
 ```
 ## Objective
@@ -449,4 +449,7 @@ After each completed step: ✅ [what was done] — [file(s) affected]
 - Compact first — run /compact [focus on X] then begin
 ```
 
-**When to use:** Opus 4.7 on any surface — claude.ai, API, Claude Code — when the task is complex, multi-file, ambiguous, or agentic. Not needed for simple one-shot tasks.
+**Autonomy calibration (Opus 4.8 / Fable 5)** — current Opus asks more often on minor decisions. If the task should run unattended, add:
+`"For minor choices (naming, formatting, default values, equivalent approaches), pick a reasonable option and note it rather than asking. For scope changes or destructive actions, still ask first."`
+
+**When to use:** Current Claude on any surface — claude.ai, API, Claude Code — when the task is complex, multi-file, ambiguous, or agentic. Not needed for simple one-shot tasks.
