@@ -160,6 +160,6 @@ Use Template K.
 
 ---
 
-## MiniMax (M2.x)
+## MiniMax (M3/M2.x)
 
 See models.md → MiniMax (UNVERIFIED) for current facts. Prompting shape: OpenAI-compatible — GPT-style prompts transfer directly; explicit role + structured output format; strip `<think>` tags via instruction if unwanted.

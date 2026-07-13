@@ -99,9 +99,9 @@ After verifying, update the section and its `last-verified` date. Never present 
 
 ## MiniMax
 
-`UNVERIFIED — carried from upstream v1.6.0; re-verify before asserting`
+`UNVERIFIED — carried from upstream 1.7.0 line, 2026-07-12; re-verify before asserting`
 
-- M2.7: OpenAI-compatible API, 1M context, strong instruction following / structured output. M2.5-highspeed: 204K context, latency-optimized.
+- Current lineup: M3, M2.7 — OpenAI-compatible API, 1M context, strong instruction following / structured output. M2.7-highspeed is the latency-optimized variant.
 - Temperature must be in (0, 1] — above 1 fails. May emit `<think>` tags — add "Output only the final answer, no reasoning tags." if unwanted.
 - Function calling: OpenAI-style tool definitions.
 
